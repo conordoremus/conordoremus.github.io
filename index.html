@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Conor Doremus | GIS Portfolio</title>
+
+  <!-- Mapbox GL JS -->
+  <link href="https://api.mapbox.com/mapbox-gl-js/v3.2.0/mapbox-gl.css" rel="stylesheet" />
+  <script src="https://api.mapbox.com/mapbox-gl-js/v3.2.0/mapbox-gl.js"></script>
+
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Source+Serif+4:ital,wght@0,300;0,400;1,300&display=swap" rel="stylesheet" />
+
+  <style>
+    /* ── Variables ── */
+    :root {
+      --bark:      #2c2416;
+      --soil:      #4a3728;
+      --clay:      #8b6347;
+      --sand:      #c9a87c;
+      --parchment: #f2ead8;
+      --moss:      #5a6e4a;
+      --sage:      #8fa67d;
+      --fog:       #e8e0d0;
+      --ink:       #1a1410;
+      --accent:    #b85c2a;
+
+      --font-display: 'Playfair Display', Georgia, serif;
+      --font-body:    'Source Serif 4', Georgia, serif;
+    }
+
+    /* ── Reset ── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--parchment);
+      color: var(--ink);
+      font-family: var(--font-body);
+      font-size: 18px;
+      line-height: 1.7;
+    }
+
+    /* ── Nav ── */
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1.2rem 3rem;
+      background: rgba(44, 36, 22, 0.92);
+      backdrop-filter: blur(8px);
+      border-bottom: 1px solid rgba(201, 168, 124, 0.2);
+    }
+
+    .nav-logo {
+      font-family: var(--font-display);
+      font-size: 1.1rem;
+      color: var(--sand);
+      letter-spacing: 0.05em;
+      text-decoration: none;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 2.5rem;
+      list-style: none;
+    }
+
+    .nav-links a {
+      color: var(--fog);
+      text-decoration: none;
+      font-size: 0.85rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      opacity: 0.8;
+      transition: opacity 0.2s, color 0.2s;
+    }
+
+    .nav-links a:hover {
+      opacity: 1;
+      color: var(--sand);
+    }
+
+    /* ── Hero / Map ── */
+    #hero {
+      position: relative;
+      height: 100vh;
+      width: 100%;
+      overflow: hidden;
+    }
+
+    #map {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+    }
+
+    /* Overlay gradient */
+    #hero::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(
+        to bottom,
+        rgba(44, 36, 22, 0.35) 0%,
+        rgba(44, 36, 22, 0.1) 40%,
+        rgba(44, 36, 22, 0.6) 80%,
+        rgba(44, 36, 22, 0.85) 100%
+      );
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    .hero-content {
+      position: absolute;
+      bottom: 10vh;
+      left: 3rem;
+      z-index: 2;
+      max-width: 600px;
+    }
+
+    .hero-eyebrow {
+      font-size: 0.8rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--sand);
+      margin-bottom: 0.75rem;
+      opacity: 0;
+      animation: fadeUp 0.8s ease 0.2s forwards;
+    }
+
+    .hero-title {
+      font-family: var(--font-display);
+      font-size: clamp(2.8rem, 6vw, 5rem);
+      font-weight: 700;
+      color: var(--parchment);
+      line-height: 1.1;
+      margin-bottom: 1rem;
+      opacity: 0;
+      animation: fadeUp 0.8s ease 0.4s forwards;
+    }
+
+    .hero-subtitle {
+      font-size: 1.05rem;
+      color: var(--fog);
+      font-weight: 300;
+      font-style: italic;
+      opacity: 0;
+      animation: fadeUp 0.8s ease 0.6s forwards;
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ── Sections ── */
+    section {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 6rem 3rem;
+    }
+
+    .section-label {
+      font-size: 0.75rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--clay);
+      margin-bottom: 0.5rem;
+    }
+
+    h2 {
+      font-family: var(--font-display);
+      font-size: clamp(2rem, 4vw, 3rem);
+      font-weight: 600;
+      color: var(--soil);
+      margin-bottom: 2.5rem;
+      line-height: 1.2;
+    }
+
+    /* Decorative rule under h2 */
+    h2::after {
+      content: '';
+      display: block;
+      width: 3rem;
+      height: 2px;
+      background: var(--accent);
+      margin-top: 0.75rem;
+    }
+
+    /* ── Projects ── */
+    #projects {
+      background: var(--fog);
+      max-width: 100%;
+      padding: 6rem 0;
+    }
+
+    #projects > * {
+      max-width: 1100px;
+      margin-left: auto;
+      margin-right: auto;
+      padding-left: 3rem;
+      padding-right: 3rem;
+    }
+
+    .projects-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 2rem;
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 0 3rem;
+    }
+
+    .project-card {
+      background: var(--parchment);
+      border: 1px solid rgba(74, 55, 40, 0.15);
+      border-radius: 2px;
+      overflow: hidden;
+      transition: transform 0.25s ease, box-shadow 0.25s ease;
+      cursor: pointer;
+    }
+
+    .project-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 12px 40px rgba(44, 36, 22, 0.15);
+    }
+
+    .project-image {
+      width: 100%;
+      height: 200px;
+      background: var(--soil);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--sand);
+      font-size: 0.8rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      overflow: hidden;
+    }
+
+    .project-image img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .project-body {
+      padding: 1.5rem;
+    }
+
+    .project-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .tag {
+      font-size: 0.7rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--moss);
+      background: rgba(90, 110, 74, 0.1);
+      border: 1px solid rgba(90, 110, 74, 0.3);
+      padding: 0.2rem 0.6rem;
+      border-radius: 2px;
+    }
+
+    .project-body h3 {
+      font-family: var(--font-display);
+      font-size: 1.25rem;
+      color: var(--soil);
+      margin-bottom: 0.5rem;
+    }
+
+    .project-body p {
+      font-size: 0.9rem;
+      color: var(--clay);
+      line-height: 1.6;
+    }
+
+    /* ── About ── */
+    #about {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 5rem;
+      align-items: start;
+    }
+
+    .about-text p {
+      color: var(--soil);
+      margin-bottom: 1.2rem;
+      font-weight: 300;
+    }
+
+    .skills-list {
+      list-style: none;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.6rem;
+    }
+
+    .skills-list li {
+      font-size: 0.85rem;
+      color: var(--clay);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .skills-list li::before {
+      content: '◆';
+      color: var(--accent);
+      font-size: 0.5rem;
+      flex-shrink: 0;
+    }
+
+    /* ── Resume ── */
+    #resume {
+      background: var(--fog);
+      max-width: 100%;
+      padding: 6rem 0;
+    }
+
+    #resume > * {
+      max-width: 1100px;
+      margin-left: auto;
+      margin-right: auto;
+      padding-left: 3rem;
+      padding-right: 3rem;
+    }
+
+    .resume-embed {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 0 3rem;
+    }
+
+    .resume-embed iframe {
+      width: 100%;
+      height: 800px;
+      border: 1px solid rgba(74, 55, 40, 0.2);
+      border-radius: 2px;
+    }
+
+    .resume-placeholder {
+      width: 100%;
+      height: 400px;
+      background: var(--parchment);
+      border: 2px dashed rgba(74, 55, 40, 0.2);
+      border-radius: 2px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 1rem;
+      color: var(--clay);
+    }
+
+    .resume-placeholder p {
+      font-size: 0.85rem;
+      letter-spacing: 0.05em;
+    }
+
+    /* ── Contact ── */
+    #contact {
+      text-align: center;
+      padding: 6rem 3rem;
+    }
+
+    #contact h2::after {
+      margin: 0.75rem auto 0;
+    }
+
+    .contact-intro {
+      max-width: 500px;
+      margin: 0 auto 2.5rem;
+      color: var(--clay);
+      font-weight: 300;
+      font-style: italic;
+    }
+
+    .contact-links {
+      display: flex;
+      justify-content: center;
+      gap: 2rem;
+      flex-wrap: wrap;
+    }
+
+    .contact-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.75rem 1.75rem;
+      background: var(--soil);
+      color: var(--parchment);
+      text-decoration: none;
+      font-size: 0.85rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      border-radius: 2px;
+      transition: background 0.2s, transform 0.2s;
+    }
+
+    .contact-link:hover {
+      background: var(--accent);
+      transform: translateY(-2px);
+    }
+
+    .contact-link.outline {
+      background: transparent;
+      border: 1px solid var(--soil);
+      color: var(--soil);
+    }
+
+    .contact-link.outline:hover {
+      background: var(--soil);
+      color: var(--parchment);
+    }
+
+    /* ── Footer ── */
+    footer {
+      background: var(--bark);
+      color: var(--sand);
+      text-align: center;
+      padding: 2rem;
+      font-size: 0.8rem;
+      letter-spacing: 0.05em;
+      opacity: 0.8;
+    }
+
+    /* ── Responsive ── */
+    @media (max-width: 768px) {
+      nav { padding: 1rem 1.5rem; }
+      .nav-links { gap: 1.5rem; }
+      section { padding: 4rem 1.5rem; }
+      .hero-content { left: 1.5rem; bottom: 8vh; }
+      #about { grid-template-columns: 1fr; gap: 2.5rem; }
+      .projects-grid { padding: 0 1.5rem; }
+      .resume-embed { padding: 0 1.5rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Navigation -->
+  <nav>
+    <a href="#hero" class="nav-logo">Conor Doremus</a>
+    <ul class="nav-links">
+      <li><a href="#projects">Projects</a></li>
+      <li><a href="#about">About</a></li>
+      <li><a href="#resume">Resume</a></li>
+      <li><a href="#contact">Contact</a></li>
+    </ul>
+  </nav>
+
+  <!-- Hero + Map -->
+  <section id="hero">
+    <div id="map"></div>
+    <div class="hero-content">
+      <p class="hero-eyebrow">GIS Portfolio</p>
+      <h1 class="hero-title">Conor Doremus</h1>
+      <p class="hero-subtitle">Remote Sensing · Spatial Analysis · Environmental Modeling</p>
+    </div>
+  </section>
+
+  <!-- Projects -->
+  <section id="projects">
+    <div>
+      <p class="section-label">Work</p>
+      <h2>Projects</h2>
+    </div>
+    <div class="projects-grid">
+
+      <!-- Project Card 1 — replace with your real project -->
+      <div class="project-card">
+        <div class="project-image">
+          <!-- Replace with: <img src="images/project1.jpg" alt="Project title" /> -->
+          Map Image
+        </div>
+        <div class="project-body">
+          <div class="project-tags">
+            <span class="tag">Remote Sensing</span>
+            <span class="tag">NDVI</span>
+          </div>
+          <h3>Project Title</h3>
+          <p>Brief description of the problem you were solving, the data you used, and what the output revealed.</p>
+        </div>
+      </div>
+
+      <!-- Project Card 2 -->
+      <div class="project-card">
+        <div class="project-image">Map Image</div>
+        <div class="project-body">
+          <div class="project-tags">
+            <span class="tag">Spatial Analysis</span>
+            <span class="tag">Python</span>
+          </div>
+          <h3>Project Title</h3>
+          <p>Brief description of the problem you were solving, the data you used, and what the output revealed.</p>
+        </div>
+      </div>
+
+      <!-- Project Card 3 -->
+      <div class="project-card">
+        <div class="project-image">Map Image</div>
+        <div class="project-body">
+          <div class="project-tags">
+            <span class="tag">Environmental Modeling</span>
+            <span class="tag">ML</span>
+          </div>
+          <h3>Project Title</h3>
+          <p>Brief description of the problem you were solving, the data you used, and what the output revealed.</p>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- About -->
+  <section id="about">
+    <div class="about-text">
+      <p class="section-label">Background</p>
+      <h2>About Me</h2>
+      <p>Write a few sentences about who you are, your background, and what draws you to GIS work. What kinds of problems do you like solving? What environments or datasets do you gravitate toward?</p>
+      <p>This is also a good place to mention your education, relevant experience, or the tools and workflows you work with most.</p>
+    </div>
+    <div class="about-skills">
+      <p class="section-label">Toolkit</p>
+      <h2>Skills</h2>
+      <ul class="skills-list">
+        <li>ArcGIS Pro</li>
+        <li>QGIS</li>
+        <li>Google Earth Engine</li>
+        <li>Python (GeoPandas)</li>
+        <li>Remote Sensing</li>
+        <li>Spatial Analysis</li>
+        <li>Machine Learning</li>
+        <li>Environmental Modeling</li>
+        <li>Mapbox GL JS</li>
+        <li>Leaflet.js</li>
+        <li>PostgreSQL / PostGIS</li>
+        <li>R (sf, terra)</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- Resume -->
+  <section id="resume">
+    <div>
+      <p class="section-label">CV</p>
+      <h2>Resume</h2>
+    </div>
+    <div class="resume-embed">
+      <!--
+        TO EMBED YOUR RESUME:
+        Option A — PDF file in your repo:
+          <iframe src="resume.pdf"></iframe>
+        Option B — Google Drive PDF:
+          Share the PDF, get the embed link, paste it below as src
+          <iframe src="YOUR_GOOGLE_DRIVE_EMBED_URL"></iframe>
+      -->
+      <div class="resume-placeholder">
+        <p>Resume goes here</p>
+        <p>Replace this with an &lt;iframe&gt; linking to your PDF</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Contact -->
+  <section id="contact">
+    <p class="section-label">Get in touch</p>
+    <h2>Contact</h2>
+    <p class="contact-intro">Interested in working together or have a question about my work?</p>
+    <div class="contact-links">
+      <a href="mailto:your@email.com" class="contact-link">Email Me</a>
+      <a href="https://linkedin.com/in/yourprofile" target="_blank" class="contact-link outline">LinkedIn</a>
+      <a href="https://github.com/conordoremus" target="_blank" class="contact-link outline">GitHub</a>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer>
+    <p>© 2026 Conor Doremus · Built with Mapbox GL JS · Hosted on GitHub Pages</p>
+  </footer>
+
+  <!-- Mapbox -->
+  <script>
+    // !! REPLACE THIS WITH YOUR MAPBOX API KEY !!
+    mapboxgl.accessToken = 'pk.eyJ1IjoiY29ub3Jkb3JlbXVzIiwiYSI6ImNtbTZvOTBybDBnOWwyb3E2cHBnNjF0OWQifQ.o1_JY3GXryiu3Qeln38uSw';
+
+    const map = new mapboxgl.Map({
+      container: 'map',
+      style: 'mapbox://styles/mapbox/outdoors-v12', // natural earth tones style
+      center: [-98.5795, 39.8283],                  // center of US — change to a place meaningful to you
+      zoom: 3.5,
+      pitch: 20,
+      bearing: 0,
+      attributionControl: false
+    });
+
+    // Subtle slow rotation for visual interest
+    function rotateCamera(timestamp) {
+      map.rotateTo((timestamp / 500) % 360, { duration: 0 });
+      requestAnimationFrame(rotateCamera);
+    }
+
+    map.on('load', () => {
+      requestAnimationFrame(rotateCamera);
+    });
+
+    // Stop rotation on user interaction
+    map.on('mousedown', () => cancelAnimationFrame(rotateCamera));
+  </script>
+
+</body>
+</html>
