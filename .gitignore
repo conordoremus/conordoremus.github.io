@@ -1,0 +1,23 @@
+# Mac system files
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Windows system files
+Thumbs.db
+desktop.ini
+
+# VS Code settings
+.vscode/
+
+# Node modules (if you add a build tool later)
+node_modules/
+npm-debug.log
+
+# Environment variables (API keys — never commit these)
+.env
+*.env
+
+# Build output folders
+dist/
+build/
